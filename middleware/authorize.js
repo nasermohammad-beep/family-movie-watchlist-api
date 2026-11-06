@@ -1,14 +1,14 @@
 export function authorizeModification(req, res, next) {
-  if (req.user?.role === "parent") {
-    return next();
-  }
+  const user = req.user;
+  const targetUserId = req.params.userId;
 
   if (
-    req.user?.role === "child" &&
-    String(req.params?.userId) === String(req.user?.id)
+    !user ||
+    (user.role !== "parent" &&
+      (user.role !== "child" || String(targetUserId) !== String(user.id)))
   ) {
-    return next();
+    return res.status(403).json({ error: "Access denied" });
   }
 
-  return res.status(403).json({ error: "Access denied" });
+  next();
 }
